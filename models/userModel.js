@@ -2,12 +2,12 @@ const db = require("../db/sqlite")
 
 class UserModel {
   static models = {
-    All: "SELECT * FROM user",
+    All: "SELECT * FROM users",
     getBy: {
-      name: "SELECT * FROM user WHERE name = ?",
-      id: "SELECT * FROM user WHERE id = ?",
+      name: "SELECT * FROM users WHERE name = ?",
+      id: "SELECT * FROM users WHERE id = ?",
     },
-    insert: "INSERT INTO user(userName, passwordDigest) VALUES (?, ?)",
+    insert: "INSERT INTO users(name, passwordDigest) VALUES (?, ?)",
   }
   static findAll = async (args) => {
     return new Promise((resolve, reject) => {
@@ -17,7 +17,7 @@ class UserModel {
       })
     })
   }
-  static findOne = async (query, args) => {
+  static findOne = async (args, query) => {
     return new Promise((resolve, reject) => {
       db.get(UserModel.models.getBy[query], args, function (err, row) {
         if (err) return reject(err.message)
@@ -25,7 +25,7 @@ class UserModel {
       })
     })
   }
-  static createOne = (query, args) => {
+  static createOne = (args) => {
     return new Promise((resolve, reject) => {
       db.run(UserModel.models.insert, args, function (err) {
         if (err) return reject(err.message)

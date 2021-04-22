@@ -15,3 +15,6 @@ node_modules
 
 # Ignore package-lock-json
 package-lock-json
+
+
+skiss.db

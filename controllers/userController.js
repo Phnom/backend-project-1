@@ -1,14 +1,19 @@
+const bcrypt = require("bcryptjs")
 const UserModel = require("../models/userModel")
 const { InvalidBody } = require("../errors")
 
 class UserController {
-  static register = (req, res, next) => {
+  static register = async (req, res, next) => {
     try {
       const { name, password } = req.body
       if (!name || !password) {
         throw new InvalidBody(["name", "password"])
       }
       // to Model
+      const data = await UserModel.createOne([
+        name,
+        bcrypt.hashSync(password, 10),
+      ])
       res.json({ message: "User registered!" })
     } catch (error) {
       next(error)

@@ -1,4 +1,4 @@
 const sqlite = require("sqlite3")
-const db = new sqlite.Database("GenGrocery.db")
+const db = new sqlite.Database("skiss.db")
 
 module.exports = db
