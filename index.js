@@ -1,8 +1,7 @@
 const express = require("express")
 const { errorHandler } = require("./middleware/errorHandler")
-const app = express()
 require("dotenv").config()
-const PORT = process.env.Port || 5000
+const app = express()
 
 app.use(express.json())
 app.use(errorHandler)
@@ -11,5 +10,7 @@ app.use(errorHandler)
 const routes = require("./routes")
 
 app.use("/api/v1", routes.userRoutes)
+
+const PORT = process.env.Port || 5000
 
 app.listen(PORT, () => console.log(`Running on port ${PORT}`))
