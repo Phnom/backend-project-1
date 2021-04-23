@@ -3,6 +3,11 @@ const { errorHandler } = require("./middleware/errorHandler")
 require("dotenv").config()
 const app = express()
 
+//
+const db = require("./db/setup")
+//db.sync()
+//
+
 app.use(express.json())
 app.use(errorHandler)
 

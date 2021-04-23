@@ -25,8 +25,6 @@ class UserController {
   }
   static me = (req, res, next) => {
     const { name, email } = req.user
-
-    // vill inte ta req.user?
     res.json({ name, email })
   }
   constructor() {}
