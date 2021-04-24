@@ -5,7 +5,6 @@ const app = express()
 
 //
 const db = require("./db/setup")
-//db.sync()
 //
 
 app.use(express.json())

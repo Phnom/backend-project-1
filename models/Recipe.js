@@ -11,7 +11,6 @@ const Recipe = db.define("Recipe", {
     allowNull: true,
   },
 })
-
 // imports user ID
 
 module.exports = Recipe

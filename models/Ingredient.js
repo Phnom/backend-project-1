@@ -1,7 +1,7 @@
 const db = require("../db/connection")
 const { DataTypes } = require("sequelize")
 
-const Ingredient = db.define("Ingredients", {
+const Ingredient = db.define("Ingredient", {
   name: {
     type: DataTypes.STRING,
     allowNull: false,

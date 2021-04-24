@@ -1,4 +1,5 @@
 const bcrypt = require("bcryptjs")
+const Ingredient = require("../models/Ingredient")
 
 //const { InvalidBody } = require("../errors")
 
