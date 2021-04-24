@@ -15,8 +15,12 @@ const Ingredient_Recipe = db.define("Ingredient_Recipe", {
 })
 
 // import recipeID & ingredientID
-Ingredient_Recipe.belongsTo(Recipe)
-Ingredient_Recipe.hasOne(Ingredient, {
-  foreignKey: { IngredientId: "IngredientId" },
+Recipe.hasMany(Ingredient_Recipe)
+Ingredient_Recipe.belongsTo(Recipe, {
+  foreignKey: "RecipeId",
+})
+Ingredient.hasOne(Ingredient_Recipe)
+Ingredient_Recipe.belongsTo(Ingredient, {
+  foreignKey: "IngredientId",
 })
 module.exports = Ingredient_Recipe

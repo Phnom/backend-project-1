@@ -33,7 +33,6 @@ User.beforeCreate((User, options) => {
 
 User.authenticate = async (email, password) => {
   const user = await User.findOne({ where: { email } })
-  console.log(email)
   if (!user) {
     throw new InvalidCredentials()
   }
