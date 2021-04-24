@@ -45,6 +45,17 @@ class RecipeController {
     }
   }
   static getOneRecipe = async (req, res) => {
+    try {
+      const { id } = req.params
+      if (!id) {
+        throw new InvalidBody(["title"])
+      }
+      const UserId = req.user.id
+      const data = await Recipe.findOne({ where: { UserId, id } })
+      res.json({ data })
+    } catch (error) {
+      next(error)
+    }
     // by userId & param
     console.log("get recipe by id")
   }
