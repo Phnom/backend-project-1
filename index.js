@@ -14,6 +14,7 @@ app.use(errorHandler)
 const routes = require("./routes")
 
 app.use("/api/v1", routes.userRoutes)
+app.use("/api/v1", routes.recipeRoutes)
 
 const PORT = process.env.Port || 5000
 
