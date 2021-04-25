@@ -9,6 +9,15 @@ class InvalidBody extends RecipeError {
   }
 }
 
+class InvalidParam extends RecipeError {
+  constructor(fields) {
+    super()
+    this.fields = fields
+    this.message = `Ìnvalid Param, require fields: ${this.fields.join(", ")}`
+    this.errorCode = 400
+  }
+}
+
 class InvalidCredentials extends RecipeError {
   constructor() {
     super()
@@ -36,6 +45,7 @@ class Unauthorized extends RecipeError {
 module.exports = {
   RecipeError,
   InvalidBody,
+  InvalidParam,
   Unauthorized,
   InvalidCredentials,
   TokenExpired,
