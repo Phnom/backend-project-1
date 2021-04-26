@@ -1,9 +1,11 @@
-const { InvalidBody, InvalidParam } = require("../errors")
+const { InvalidBody, InvalidParam, NoRecipeError } = require("../errors")
 const Ingredient = require("../models/Ingredient")
 const Recipe = require("../models/Recipe")
 const IngredientItem = require("../models/Ingredient_Recipe")
 
 //const { InvalidBody } = require("../errors")
+
+/// fånga upp undefined från SQL saknas tabbel?
 
 class RecipeController {
   static getAllIngredients = async (req, res, next) => {
@@ -68,8 +70,12 @@ class RecipeController {
   static getAllRecipes = async (req, res, next) => {
     try {
       const UserId = req.user.id
-      const data = await Recipe.findAll({ UserId })
-      res.json({ data })
+      const data = await Recipe.findAll({ where: { UserId } })
+      if (data) {
+        res.json({ data })
+      } else {
+        throw new NoRecipeError()
+      }
     } catch (error) {
       next(error)
     }
@@ -82,7 +88,11 @@ class RecipeController {
       }
       const UserId = req.user.id
       const data = await Recipe.findOne({ where: { UserId, id } })
-      res.json({ data })
+      if (data) {
+        res.json({ data })
+      } else {
+        throw new NoRecipeError()
+      }
     } catch (error) {
       next(error)
     }

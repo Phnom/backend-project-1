@@ -42,6 +42,13 @@ class Unauthorized extends RecipeError {
   }
 }
 
+class NoRecipeError extends RecipeError {
+  constructor() {
+    super()
+    this.message = "Can't find that recipe sir."
+  }
+}
+
 module.exports = {
   RecipeError,
   InvalidBody,
@@ -49,4 +56,5 @@ module.exports = {
   Unauthorized,
   InvalidCredentials,
   TokenExpired,
+  NoRecipeError,
 }
