@@ -53,7 +53,7 @@ class RecipeController {
       next(error)
     }
   }
-  static deleteRecipe = (req, res, next) => {
+  static deleteRecipe = async (req, res, next) => {
     // kan delete även om recept inte finns?
     // deletar receptet men inte ingredientItem
     try {
@@ -61,8 +61,13 @@ class RecipeController {
       if (!id) {
         throw new InvalidParam(["id"])
       }
-      Recipe.destroy({ where: { id } })
-      res.json({ message: `Recipe no ${id} is deleted!` })
+      const UserId = req.user.id
+      const data = await Recipe.destroy({ where: { id, UserId } })
+      if (data === 0) {
+        throw new NoRecipeError()
+      } else {
+        res.json({ message: `Recipe no ${id} is deleted!` })
+      }
     } catch (error) {
       next(error)
     }
