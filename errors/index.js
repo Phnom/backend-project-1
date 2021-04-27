@@ -1,3 +1,5 @@
+const Recipe = require("../models/Recipe")
+
 class RecipeError extends Error {}
 
 class InvalidBody extends RecipeError {
@@ -46,6 +48,23 @@ class NoRecipeError extends RecipeError {
   constructor() {
     super()
     this.message = "Can't find that recipe sir."
+    this.errorCode = 402
+  }
+}
+
+class NoWritePermission extends RecipeError {
+  constructor() {
+    super()
+    this.message = "Not your Recipe Sir"
+    this.errorCode = 404
+  }
+}
+
+class UniqueName extends RecipeError {
+  constructor() {
+    super()
+    this.message = "That name is already taken Sir"
+    this.errorCode = 405
   }
 }
 
@@ -57,4 +76,6 @@ module.exports = {
   InvalidCredentials,
   TokenExpired,
   NoRecipeError,
+  NoWritePermission,
+  UniqueName,
 }

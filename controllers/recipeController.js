@@ -1,17 +1,30 @@
-const { InvalidBody, InvalidParam, NoRecipeError } = require("../errors")
-const Ingredient = require("../models/Ingredient")
+const {
+  InvalidBody,
+  InvalidParam,
+  NoRecipeError,
+  NoWritePermission,
+} = require("../errors")
 const Recipe = require("../models/Recipe")
-const IngredientItem = require("../models/Ingredient_Recipe")
-
-//const { InvalidBody } = require("../errors")
+const Ingredient = require("../models/Ingredient")
 
 /// fånga upp undefined från SQL saknas tabbel?
+function parseQuery(query) {
+  const page = +query.page || 1
+  let pageSize = +query.pageSize || 10
+  pageSize = pageSize > 10 ? 10 : pageSize
+  pageSize = pageSize < 1 ? 1 : pageSize
+  return { page, pageSize }
+}
 
 class RecipeController {
   static getAllIngredients = async (req, res, next) => {
+    const { page, pageSize } = parseQuery(req.query)
     // sökfunktion kvar
     try {
-      const data = await Ingredient.findAll()
+      const data = await Ingredient.findAll({
+        limit: pageSize,
+        offset: (page - 1) * pageSize,
+      })
       res.json({ data })
     } catch (error) {
       next(error)
@@ -23,9 +36,9 @@ class RecipeController {
       if (!title) {
         throw new InvalidBody(["title"])
       }
+      // lägg till desc
       const UserId = req.user.id
-      // utveckla med logiska uttryck för att ta emot ingredienser vid post
-      const data = await Recipe.create({ title, UserId })
+      await Recipe.create({ title, UserId })
       res.json({ message: "New recipe created!" })
     } catch (error) {
       next(error)
@@ -33,28 +46,32 @@ class RecipeController {
   }
   static patchRecipe = async (req, res, next) => {
     try {
-      const { IngredientId, RecipeId, amount, measure } = req.body
-      if (!amount || !measure || !IngredientId || !RecipeId) {
-        throw new InvalidBody(["amount"])
+      const { id } = req.params
+      const { IngredientId, amount, measure, title, content } = req.body
+      if (!id) {
+        throw new InvalidBody(["RecipeId"], ["title"], ["amount"])
       }
-      // olika för ID & värden?
-      // beskrivningen av receptet?
-      // utveckla med logiska uttryck för att ta emot ingredienser vid post
-      const data = await IngredientItem.create({
+      const UserId = req.user.id
+
+      // Recipe.ownership
+      const recipe = await Recipe.findOne({ where: { id, UserId } })
+      if (!recipe) {
+        throw new NoWritePermission()
+      }
+      const modelResponse = await Recipe.patchRecipe(
+        IngredientId,
+        id,
         amount,
         measure,
-        IngredientId,
-        RecipeId,
-      })
-      console.log(data)
-      // Model find One => rad under recipe no, eller kanske name?
-      res.json({ message: `New Ingredient added to recipe no ${RecipeId}!` })
+        title,
+        content
+      )
+      res.json({ message: `${modelResponse} added to recipe no ${id}!` })
     } catch (error) {
       next(error)
     }
   }
   static deleteRecipe = async (req, res, next) => {
-    // kan delete även om recept inte finns?
     // deletar receptet men inte ingredientItem
     try {
       const { id } = req.params
@@ -62,6 +79,12 @@ class RecipeController {
         throw new InvalidParam(["id"])
       }
       const UserId = req.user.id
+
+      // Recipe.ownership
+      const recipe = await Recipe.findOne({ where: { id, UserId } })
+      if (!recipe) {
+        throw new NoWritePermission()
+      }
       const data = await Recipe.destroy({ where: { id, UserId } })
       if (data === 0) {
         throw new NoRecipeError()
@@ -73,9 +96,16 @@ class RecipeController {
     }
   }
   static getAllRecipes = async (req, res, next) => {
+    const { page, pageSize } = parseQuery(req.query)
+    // ta emot namn, parse query lite annorlunda.
+    // filter eller includes ? efte find all på query skicka ny data med json
     try {
       const UserId = req.user.id
-      const data = await Recipe.findAll({ where: { UserId } })
+      const data = await Recipe.findAll({
+        limit: pageSize,
+        offset: (page - 1) * pageSize,
+        where: { UserId },
+      })
       if (data) {
         res.json({ data })
       } else {

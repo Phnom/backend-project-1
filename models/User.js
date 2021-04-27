@@ -27,8 +27,8 @@ const User = db.define("User", {
   },
 })
 
-User.beforeCreate((User, options) => {
-  User.password = bcrypt.hashSync(User.password, 10)
+User.beforeCreate((user, options) => {
+  user.password = bcrypt.hashSync(user.password, 10)
 })
 
 User.authenticate = async (email, password) => {
