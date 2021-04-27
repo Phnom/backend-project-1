@@ -19,7 +19,6 @@ function parseQuery(query) {
 class RecipeController {
   static getAllIngredients = async (req, res, next) => {
     const { page, pageSize } = parseQuery(req.query)
-    // sökfunktion kvar
     try {
       const data = await Ingredient.findAll({
         limit: pageSize,
@@ -54,7 +53,7 @@ class RecipeController {
       const UserId = req.user.id
 
       // Recipe.ownership
-      const recipe = await Recipe.findOne({ where: { id, UserId } })
+      const recipe = await Recipe.findRecipe(UserId, id)
       if (!recipe) {
         throw new NoWritePermission()
       }
@@ -81,7 +80,7 @@ class RecipeController {
       const UserId = req.user.id
 
       // Recipe.ownership
-      const recipe = await Recipe.findOne({ where: { id, UserId } })
+      const recipe = await Recipe.findRecipe(UserId, id)
       if (!recipe) {
         throw new NoWritePermission()
       }
@@ -101,11 +100,7 @@ class RecipeController {
     // filter eller includes ? efte find all på query skicka ny data med json
     try {
       const UserId = req.user.id
-      const data = await Recipe.findAll({
-        limit: pageSize,
-        offset: (page - 1) * pageSize,
-        where: { UserId },
-      })
+      const data = await Recipe.findAllRecipes(page, pageSize, UserId)
       if (data) {
         res.json({ data })
       } else {
@@ -122,7 +117,7 @@ class RecipeController {
         throw new InvalidParam(["id"])
       }
       const UserId = req.user.id
-      const data = await Recipe.findOne({ where: { UserId, id } })
+      const data = await Recipe.findRecipe(UserId, id)
       if (data) {
         res.json({ data })
       } else {

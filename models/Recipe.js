@@ -16,6 +16,21 @@ const Recipe = db.define("Recipe", {
   },
 })
 
+Recipe.findAllRecipes = async (page, pageSize, UserId) => {
+  return await Recipe.findAll({
+    limit: pageSize,
+    offset: (page - 1) * pageSize,
+    where: { UserId },
+    include: [Ingredient, Instruction],
+  })
+}
+Recipe.findRecipe = async (UserId, id) => {
+  return await Recipe.findOne({
+    where: { UserId, id },
+    include: [Instruction, Instruction],
+  })
+}
+
 Recipe.patchRecipe = async (
   IngredientId,
   RecipeId,
@@ -36,11 +51,18 @@ Recipe.patchRecipe = async (
   return response
 }
 
-User.hasMany(Recipe)
+User.hasMany(Recipe, {
+  foreignKey: {
+    allowNull: false,
+  },
+})
 Recipe.hasMany(Instruction)
 Ingredient.belongsToMany(Recipe, { through: Ingredient_Recipe })
+Recipe.belongsToMany(Ingredient, { through: Ingredient_Recipe })
 Instruction.belongsTo(Recipe, {
   foreignKey: "RecipeId",
 })
+
+// lite allow nulls false maybe?
 
 module.exports = Recipe

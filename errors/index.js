@@ -1,5 +1,3 @@
-const Recipe = require("../models/Recipe")
-
 class RecipeError extends Error {}
 
 class InvalidBody extends RecipeError {
