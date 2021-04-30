@@ -4,7 +4,11 @@ const User = require("./User")
 const Ingredient = require("./Ingredient")
 const Ingredient_Recipe = require("./Ingredient_Recipe")
 const Instruction = require("./Instruction")
-
+const {
+  NotYourRecipeError,
+  UniqueIngredient,
+  NotAIngredientError,
+} = require("../errors")
 const { Op } = require("sequelize")
 
 const Recipe = db.define("Recipe", {
@@ -18,18 +22,6 @@ const Recipe = db.define("Recipe", {
   },
 })
 
-Recipe.findAllIngredients = async (page, pageSize, pageString) => {
-  return await Ingredient.findAll({
-    limit: pageSize,
-    offset: (page - 1) * pageSize,
-    where: {
-      name: {
-        [Op.substring]: pageString,
-      },
-    },
-  })
-}
-
 Recipe.findAllRecipes = async (page, pageSize, UserId, pageString) => {
   const data = await Recipe.findAll({
     where: {
@@ -42,7 +34,6 @@ Recipe.findAllRecipes = async (page, pageSize, UserId, pageString) => {
     limit: pageSize,
     offset: (page - 1) * pageSize,
   })
-
   return data
 }
 Recipe.findRecipe = async (UserId, id) => {
@@ -58,16 +49,39 @@ Recipe.patchRecipe = async (
   amount,
   measure,
   title,
-  content
+  content,
+  UserId
 ) => {
+  measure ? (measure = measure) : (measure = null)
   let response = ""
-  if (amount) {
-    await Ingredient_Recipe.create({ amount, measure, IngredientId, RecipeId })
+  const isUser = await Recipe.findRecipe(UserId, RecipeId)
+  if (!isUser) {
+    throw new NotYourRecipeError()
+  }
+  if (amount && IngredientId) {
+    const isIngredient = await Ingredient.findOne({
+      where: { id: IngredientId },
+    })
+    if (!isIngredient) {
+      throw new NotAIngredientError()
+    }
+    try {
+      await Ingredient_Recipe.create({
+        amount,
+        measure,
+        IngredientId,
+        RecipeId,
+      })
+    } catch (error) {
+      throw new UniqueIngredient()
+    }
     response = "Ingredient"
   }
   if (title) {
     await Instruction.create({ title, content, RecipeId })
-    amount ? (response += " and instruction") : (response = "Instruction")
+    amount && IngredientId
+      ? (response += " and instruction")
+      : (response = "Instruction")
   }
   return response
 }

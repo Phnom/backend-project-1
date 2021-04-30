@@ -21,7 +21,7 @@ class InvalidParam extends RecipeError {
 class InvalidCredentials extends RecipeError {
   constructor() {
     super()
-    this.message = `Invalid credentials`
+    this.message = `Invalid credentials Sir!`
     this.errorCode = 403
   }
 }
@@ -29,7 +29,7 @@ class InvalidCredentials extends RecipeError {
 class TokenExpired extends RecipeError {
   constructor() {
     super()
-    this.message = `Token expired, please log in again`
+    this.message = `Token expired, please login again Sir!`
     this.errorCode = 401
   }
 }
@@ -37,7 +37,8 @@ class TokenExpired extends RecipeError {
 class Unauthorized extends RecipeError {
   constructor() {
     super()
-    this.message = "Unauthorized"
+    this.message =
+      "Unauthorized, Sir I wish I’d thought of your feelings as well."
     this.errorCode = 401
   }
 }
@@ -45,7 +46,7 @@ class Unauthorized extends RecipeError {
 class NoRecipeError extends RecipeError {
   constructor() {
     super()
-    this.message = "Can't find that recipe sir."
+    this.message = "Pardon me, I can't it! I can't find that recipe Sir!"
     this.errorCode = 402
   }
 }
@@ -53,7 +54,8 @@ class NoRecipeError extends RecipeError {
 class NoWritePermission extends RecipeError {
   constructor() {
     super()
-    this.message = "Not your Recipe Sir"
+    this.message =
+      "You ain't granted permission for that kind of writing exercise Sir!"
     this.errorCode = 404
   }
 }
@@ -61,7 +63,7 @@ class NoWritePermission extends RecipeError {
 class UniqueName extends RecipeError {
   constructor() {
     super()
-    this.message = "That name is already taken Sir"
+    this.message = "That name is already taken Sir!"
     this.errorCode = 405
   }
 }
@@ -69,8 +71,23 @@ class UniqueName extends RecipeError {
 class UniqueIngredient extends RecipeError {
   constructor() {
     super()
-    this.message = "That Ingredient is already taken Sir"
+    this.message = "We already got that ingredient in our recipe Sir!"
     this.errorCode = 405
+  }
+}
+class NotYourRecipeError extends RecipeError {
+  constructor() {
+    super()
+    this.message = "That's not your recipe Sir!"
+    this.errorCode = 407
+  }
+}
+
+class NotAIngredientError extends RecipeError {
+  constructor() {
+    super()
+    this.message = "That's not a Ingredient in our system Sir!"
+    this.errorCode = 407
   }
 }
 
@@ -85,4 +102,6 @@ module.exports = {
   NoWritePermission,
   UniqueName,
   UniqueIngredient,
+  NotYourRecipeError,
+  NotAIngredientError,
 }

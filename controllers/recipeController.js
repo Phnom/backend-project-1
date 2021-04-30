@@ -7,6 +7,7 @@ const {
 const Recipe = require("../models/Recipe")
 const Ingredient = require("../models/Ingredient")
 
+const { Op } = require("sequelize")
 /// fånga upp undefined från SQL saknas tabbel?
 function parseQuery(query) {
   const page = +query.page || 1
@@ -21,7 +22,15 @@ class RecipeController {
   static getAllIngredients = async (req, res, next) => {
     try {
       const { page, pageSize, pageString } = parseQuery(req.query)
-      const data = await Recipe.findAllIngredients(page, pageSize, pageString)
+      const data = await Ingredient.findAll({
+        limit: pageSize,
+        offset: (page - 1) * pageSize,
+        where: {
+          name: {
+            [Op.substring]: pageString,
+          },
+        },
+      })
       res.json({ data })
     } catch (error) {
       next(error)
@@ -48,34 +57,14 @@ class RecipeController {
         throw new InvalidBody(["RecipeId"], ["title"], ["amount"])
       }
       const UserId = req.user.id
-      // Ingredient already added ? error
-      // Recipe.ownership move to patchRecipe
-      /*
-      const recipe = await Recipe.findRecipe(UserId, id)
-      console.log("skurt")
-      console.log(recipe.Ingredients[0].dataValues)
-      console.log(IngredientId)
-      console.log(
-        recipe.Ingredients.includes(
-          (ingredient) => ingredient.dataValues.id === IngredientId
-        )
-      )
-      */
-      if (!recipe) {
-        throw new NoWritePermission()
-      }
-      /* 
-      else if (recipe.Ingredients) {
-        throw new UniqueIngredient()
-      }
-      */
       const modelResponse = await Recipe.patchRecipe(
         IngredientId,
         id,
         amount,
         measure,
         title,
-        content
+        content,
+        UserId
       )
       res.json({ message: `${modelResponse} added to recipe no ${id}!` })
     } catch (error) {
