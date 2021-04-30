@@ -8,12 +8,10 @@ class UserController {
       if (!name || !password || !email) {
         throw new InvalidBody(["name", "password", "email"])
       }
-      /*
       const user = await User.findOne({ where: { name } })
-      if (!user) {
+      if (user) {
         throw new UniqueName()
       }
-      */
       await User.create({ name, password, email })
       res.json({ message: "User registered!" })
     } catch (error) {

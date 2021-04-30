@@ -5,6 +5,8 @@ const Ingredient = require("./Ingredient")
 const Ingredient_Recipe = require("./Ingredient_Recipe")
 const Instruction = require("./Instruction")
 
+const { Op } = require("sequelize")
+
 const Recipe = db.define("Recipe", {
   title: {
     type: DataTypes.STRING,
@@ -16,18 +18,37 @@ const Recipe = db.define("Recipe", {
   },
 })
 
-Recipe.findAllRecipes = async (page, pageSize, UserId) => {
-  return await Recipe.findAll({
+Recipe.findAllIngredients = async (page, pageSize, pageString) => {
+  return await Ingredient.findAll({
     limit: pageSize,
     offset: (page - 1) * pageSize,
-    where: { UserId },
-    include: [Ingredient, Instruction],
+    where: {
+      name: {
+        [Op.substring]: pageString,
+      },
+    },
   })
+}
+
+Recipe.findAllRecipes = async (page, pageSize, UserId, pageString) => {
+  const data = await Recipe.findAll({
+    where: {
+      UserId,
+      title: {
+        [Op.substring]: pageString,
+      },
+    },
+    include: [Ingredient, Instruction],
+    limit: pageSize,
+    offset: (page - 1) * pageSize,
+  })
+
+  return data
 }
 Recipe.findRecipe = async (UserId, id) => {
   return await Recipe.findOne({
     where: { UserId, id },
-    include: [Instruction, Instruction],
+    include: [Ingredient, Instruction],
   })
 }
 

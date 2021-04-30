@@ -11,19 +11,17 @@ const Ingredient = require("../models/Ingredient")
 function parseQuery(query) {
   const page = +query.page || 1
   let pageSize = +query.pageSize || 10
+  const pageString = query.title ? query.title : query.name
   pageSize = pageSize > 10 ? 10 : pageSize
   pageSize = pageSize < 1 ? 1 : pageSize
-  return { page, pageSize }
+  return { page, pageSize, pageString }
 }
 
 class RecipeController {
   static getAllIngredients = async (req, res, next) => {
-    const { page, pageSize } = parseQuery(req.query)
     try {
-      const data = await Ingredient.findAll({
-        limit: pageSize,
-        offset: (page - 1) * pageSize,
-      })
+      const { page, pageSize, pageString } = parseQuery(req.query)
+      const data = await Recipe.findAllIngredients(page, pageSize, pageString)
       res.json({ data })
     } catch (error) {
       next(error)
@@ -31,13 +29,12 @@ class RecipeController {
   }
   static postRecipe = async (req, res, next) => {
     try {
-      const { title } = req.body
-      if (!title) {
-        throw new InvalidBody(["title"])
+      const { title, desc } = req.body
+      if ((!title, !desc)) {
+        throw new InvalidBody(["title"], ["description"])
       }
-      // lägg till desc
       const UserId = req.user.id
-      await Recipe.create({ title, UserId })
+      await Recipe.create({ title, desc, UserId })
       res.json({ message: "New recipe created!" })
     } catch (error) {
       next(error)
@@ -51,12 +48,27 @@ class RecipeController {
         throw new InvalidBody(["RecipeId"], ["title"], ["amount"])
       }
       const UserId = req.user.id
-
-      // Recipe.ownership
+      // Ingredient already added ? error
+      // Recipe.ownership move to patchRecipe
+      /*
       const recipe = await Recipe.findRecipe(UserId, id)
+      console.log("skurt")
+      console.log(recipe.Ingredients[0].dataValues)
+      console.log(IngredientId)
+      console.log(
+        recipe.Ingredients.includes(
+          (ingredient) => ingredient.dataValues.id === IngredientId
+        )
+      )
+      */
       if (!recipe) {
         throw new NoWritePermission()
       }
+      /* 
+      else if (recipe.Ingredients) {
+        throw new UniqueIngredient()
+      }
+      */
       const modelResponse = await Recipe.patchRecipe(
         IngredientId,
         id,
@@ -79,7 +91,7 @@ class RecipeController {
       }
       const UserId = req.user.id
 
-      // Recipe.ownership
+      // Recipe.ownership Recipe.deleteRecipe(UserId, id)
       const recipe = await Recipe.findRecipe(UserId, id)
       if (!recipe) {
         throw new NoWritePermission()
@@ -95,12 +107,15 @@ class RecipeController {
     }
   }
   static getAllRecipes = async (req, res, next) => {
-    const { page, pageSize } = parseQuery(req.query)
-    // ta emot namn, parse query lite annorlunda.
-    // filter eller includes ? efte find all på query skicka ny data med json
     try {
+      const { page, pageSize, pageString } = parseQuery(req.query)
       const UserId = req.user.id
-      const data = await Recipe.findAllRecipes(page, pageSize, UserId)
+      const data = await Recipe.findAllRecipes(
+        page,
+        pageSize,
+        UserId,
+        pageString
+      )
       if (data) {
         res.json({ data })
       } else {

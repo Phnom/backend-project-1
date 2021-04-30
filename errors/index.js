@@ -66,6 +66,14 @@ class UniqueName extends RecipeError {
   }
 }
 
+class UniqueIngredient extends RecipeError {
+  constructor() {
+    super()
+    this.message = "That Ingredient is already taken Sir"
+    this.errorCode = 405
+  }
+}
+
 module.exports = {
   RecipeError,
   InvalidBody,
@@ -76,4 +84,5 @@ module.exports = {
   NoRecipeError,
   NoWritePermission,
   UniqueName,
+  UniqueIngredient,
 }
