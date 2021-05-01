@@ -4,11 +4,7 @@ const User = require("./User")
 const Ingredient = require("./Ingredient")
 const Ingredient_Recipe = require("./Ingredient_Recipe")
 const Instruction = require("./Instruction")
-const {
-  NotYourRecipeError,
-  UniqueIngredient,
-  NotAIngredientError,
-} = require("../errors")
+const { UniqueIngredient, NoWritePermission } = require("../errors")
 const { Op } = require("sequelize")
 
 const Recipe = db.define("Recipe", {
@@ -22,8 +18,9 @@ const Recipe = db.define("Recipe", {
   },
 })
 
+// model used to find ALL Recipes created by authorized user
 Recipe.findAllRecipes = async (page, pageSize, UserId, pageString) => {
-  const data = await Recipe.findAll({
+  return await Recipe.findAll({
     where: {
       UserId,
       title: {
@@ -34,15 +31,22 @@ Recipe.findAllRecipes = async (page, pageSize, UserId, pageString) => {
     limit: pageSize,
     offset: (page - 1) * pageSize,
   })
-  return data
 }
+// model used to find One Recipes created by authorized user
 Recipe.findRecipe = async (UserId, id) => {
   return await Recipe.findOne({
     where: { UserId, id },
     include: [Ingredient, Instruction],
   })
 }
-
+// model to check writing permission for a authorized user
+Recipe.writePermission = async (UserId, RecipeId) => {
+  const isUser = await Recipe.findRecipe(UserId, RecipeId)
+  if (!isUser) {
+    throw new NoWritePermission("recipe")
+  }
+}
+// model used to patch One Recipes created by authorized user
 Recipe.patchRecipe = async (
   IngredientId,
   RecipeId,
@@ -54,10 +58,7 @@ Recipe.patchRecipe = async (
 ) => {
   measure ? (measure = measure) : (measure = null)
   let response = ""
-  const isUser = await Recipe.findRecipe(UserId, RecipeId)
-  if (!isUser) {
-    throw new NotYourRecipeError()
-  }
+  await Recipe.writePermission(UserId, RecipeId)
   if (amount && IngredientId) {
     const isIngredient = await Ingredient.findOne({
       where: { id: IngredientId },
@@ -86,6 +87,7 @@ Recipe.patchRecipe = async (
   return response
 }
 
+// Entity Relations for the Recipe and therefor this app.
 User.hasMany(Recipe, {
   foreignKey: {
     allowNull: false,
@@ -97,7 +99,5 @@ Recipe.belongsToMany(Ingredient, { through: Ingredient_Recipe })
 Instruction.belongsTo(Recipe, {
   foreignKey: "RecipeId",
 })
-
-// lite allow nulls false maybe?
 
 module.exports = Recipe

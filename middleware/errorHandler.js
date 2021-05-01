@@ -1,9 +1,8 @@
 const { RecipeError } = require("../errors")
 const { BaseError } = require("sequelize")
-// import av BaseError från Sequalize
 
 module.exports = {
-  errorHandler(error, req, res, next) {
+  errorHandler: (error, req, res, next) => {
     if (error instanceof RecipeError) {
       res.status(error.errorCode).json({ error: error.message })
     } else if (error instanceof BaseError) {
@@ -16,3 +15,8 @@ module.exports = {
     }
   },
 }
+
+// handles Errors
+// this middleWare handles the flow of the errors
+// used in Controllers with next
+// filename errors/index handles the informations of the errors

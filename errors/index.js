@@ -37,8 +37,7 @@ class TokenExpired extends RecipeError {
 class Unauthorized extends RecipeError {
   constructor() {
     super()
-    this.message =
-      "Unauthorized, Sir I wish I’d thought of your feelings as well."
+    this.message = "Unauthorized, Maybe better luck next time Sir!."
     this.errorCode = 401
   }
 }
@@ -46,28 +45,35 @@ class Unauthorized extends RecipeError {
 class NoRecipeError extends RecipeError {
   constructor() {
     super()
-    this.message = "Pardon me, I can't it! I can't find that recipe Sir!"
+    this.message = "Sorry, I can't find that recipe Sir!"
     this.errorCode = 402
   }
 }
 
-class NoWritePermission extends RecipeError {
+class NoIngredientError extends RecipeError {
   constructor() {
     super()
     this.message =
-      "You ain't granted permission for that kind of writing exercise Sir!"
+      "Oops, Something went wrong Sir. I'm so, so sorry, but I can't find that Ingredient. Take a cup of tea and it everything will feel alright, trust me."
+    this.errorCode = 42
+  }
+}
+
+class NoWritePermission extends RecipeError {
+  constructor(item) {
+    super()
+    this.message = `That's not your ${item} Sir! You ain't granted permission for that kind of writing exercise.`
     this.errorCode = 404
   }
 }
 
-class UniqueName extends RecipeError {
+class UniqueNameError extends RecipeError {
   constructor() {
     super()
     this.message = "That name is already taken Sir!"
     this.errorCode = 405
   }
 }
-
 class UniqueIngredient extends RecipeError {
   constructor() {
     super()
@@ -75,33 +81,17 @@ class UniqueIngredient extends RecipeError {
     this.errorCode = 405
   }
 }
-class NotYourRecipeError extends RecipeError {
-  constructor() {
-    super()
-    this.message = "That's not your recipe Sir!"
-    this.errorCode = 407
-  }
-}
-
-class NotAIngredientError extends RecipeError {
-  constructor() {
-    super()
-    this.message = "That's not a Ingredient in our system Sir!"
-    this.errorCode = 407
-  }
-}
 
 module.exports = {
   RecipeError,
   InvalidBody,
   InvalidParam,
-  Unauthorized,
   InvalidCredentials,
-  TokenExpired,
-  NoRecipeError,
+  Unauthorized,
   NoWritePermission,
-  UniqueName,
+  NoIngredientError,
+  NoRecipeError,
+  TokenExpired,
+  UniqueNameError,
   UniqueIngredient,
-  NotYourRecipeError,
-  NotAIngredientError,
 }

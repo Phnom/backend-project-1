@@ -1,9 +1,6 @@
-const db = require("./setup")
-
-const Ingredient = require("../models/Ingredient")
-
 const fs = require("fs")
 const text = fs.readFileSync("ingredients.txt").toString().split("\n")
+const Ingredient = require("../models/Ingredient")
 
 const seed = async (ingredient) => {
   try {

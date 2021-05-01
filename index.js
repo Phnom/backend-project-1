@@ -3,16 +3,12 @@ const { errorHandler } = require("./middleware/errorHandler")
 require("dotenv").config()
 const app = express()
 
-//
-const db = require("./db/setup")
-//
-
 app.use(express.json())
 app.use(errorHandler)
 
-// Custom routes
 const routes = require("./routes")
 
+// Custom routes
 app.use("/api/v1", routes.userRoutes)
 app.use("/api/v1", routes.recipeRoutes)
 

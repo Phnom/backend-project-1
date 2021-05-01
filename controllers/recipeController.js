@@ -1,27 +1,23 @@
+const { Op } = require("sequelize")
+const Recipe = require("../models/Recipe")
+const Ingredient = require("../models/Ingredient")
 const {
   InvalidBody,
   InvalidParam,
   NoRecipeError,
-  NoWritePermission,
+  NoIngredientError,
 } = require("../errors")
-const Recipe = require("../models/Recipe")
-const Ingredient = require("../models/Ingredient")
+const { parseQuery } = require("../middleware/parseQuery")
 
-const { Op } = require("sequelize")
-/// fånga upp undefined från SQL saknas tabbel?
-function parseQuery(query) {
-  const page = +query.page || 1
-  let pageSize = +query.pageSize || 10
-  const pageString = query.title ? query.title : query.name
-  pageSize = pageSize > 10 ? 10 : pageSize
-  pageSize = pageSize < 1 ? 1 : pageSize
-  return { page, pageSize, pageString }
-}
-
-class RecipeController {
-  static getAllIngredients = async (req, res, next) => {
+module.exports = {
+  getAllIngredients: async (req, res, next) => {
     try {
+      //Parse and check Query
       const { page, pageSize, pageString } = parseQuery(req.query)
+      if (!page || !pageSize || !pageString) {
+        throw new InvalidParam(["page"], ["pageSize"], ["title or name"])
+      }
+      //to model data is an Object if not throw error
       const data = await Ingredient.findAll({
         limit: pageSize,
         offset: (page - 1) * pageSize,
@@ -31,32 +27,45 @@ class RecipeController {
           },
         },
       })
-      res.json({ data })
+      if (data) {
+        res.json({ data })
+      } else {
+        throw new NoIngredientError()
+      }
     } catch (error) {
       next(error)
     }
-  }
-  static postRecipe = async (req, res, next) => {
+  },
+  postRecipe: async (req, res, next) => {
     try {
+      //Check Body
       const { title, desc } = req.body
-      if ((!title, !desc)) {
+      if (!title || !desc) {
         throw new InvalidBody(["title"], ["description"])
       }
       const UserId = req.user.id
+      // to model
       await Recipe.create({ title, desc, UserId })
       res.json({ message: "New recipe created!" })
     } catch (error) {
       next(error)
     }
-  }
-  static patchRecipe = async (req, res, next) => {
+  },
+  patchRecipe: async (req, res, next) => {
     try {
+      //Check params
       const { id } = req.params
-      const { IngredientId, amount, measure, title, content } = req.body
       if (!id) {
-        throw new InvalidBody(["RecipeId"], ["title"], ["amount"])
+        throw new InvalidParam(["id"])
       }
+      //Check body, measure & content is optional
+      const { IngredientId, amount, measure, title, content } = req.body
+      if (!IngredientId || !amount || !title) {
+        throw new InvalidBody(["RecipeId"], ["amount"], ["title"])
+      }
+
       const UserId = req.user.id
+      //to model => modelResponse is a String
       const modelResponse = await Recipe.patchRecipe(
         IngredientId,
         id,
@@ -70,21 +79,19 @@ class RecipeController {
     } catch (error) {
       next(error)
     }
-  }
-  static deleteRecipe = async (req, res, next) => {
-    // deletar receptet men inte ingredientItem
+  },
+  deleteRecipe: async (req, res, next) => {
     try {
+      //Check params
       const { id } = req.params
       if (!id) {
         throw new InvalidParam(["id"])
       }
       const UserId = req.user.id
+      //Check permission
+      await Recipe.writePermission(UserId, id)
 
-      // Recipe.ownership Recipe.deleteRecipe(UserId, id)
-      const recipe = await Recipe.findRecipe(UserId, id)
-      if (!recipe) {
-        throw new NoWritePermission()
-      }
+      //Destroy Recipe table if data is 0 there was no Recipe
       const data = await Recipe.destroy({ where: { id, UserId } })
       if (data === 0) {
         throw new NoRecipeError()
@@ -94,11 +101,17 @@ class RecipeController {
     } catch (error) {
       next(error)
     }
-  }
-  static getAllRecipes = async (req, res, next) => {
+  },
+  getAllRecipes: async (req, res, next) => {
     try {
+      //Parse and check Query
       const { page, pageSize, pageString } = parseQuery(req.query)
+      if (!page || !pageSize || !pageString) {
+        throw new InvalidParam(["page"], ["pageSize"], ["title or name"])
+      }
+
       const UserId = req.user.id
+      //to model data is an Object if not throw error
       const data = await Recipe.findAllRecipes(
         page,
         pageSize,
@@ -113,14 +126,17 @@ class RecipeController {
     } catch (error) {
       next(error)
     }
-  }
-  static getOneRecipe = async (req, res, next) => {
+  },
+  getOneRecipe: async (req, res, next) => {
     try {
+      //Check param
       const { id } = req.params
       if (!id) {
         throw new InvalidParam(["id"])
       }
+
       const UserId = req.user.id
+      //to model data is an Object if not throw error
       const data = await Recipe.findRecipe(UserId, id)
       if (data) {
         res.json({ data })
@@ -130,8 +146,5 @@ class RecipeController {
     } catch (error) {
       next(error)
     }
-  }
-  constructor() {}
+  },
 }
-
-module.exports = RecipeController

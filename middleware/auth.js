@@ -13,3 +13,6 @@ module.exports = {
     next()
   },
 }
+
+// used in routes to auth permission to use controllers
+// uses model from User to validateToken

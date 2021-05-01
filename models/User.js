@@ -27,10 +27,14 @@ const User = db.define("User", {
   },
 })
 
+// beforeCreateHOOK used to hash and salt things up.
+// is used in userController
 User.beforeCreate((user, options) => {
   user.password = bcrypt.hashSync(user.password, 10)
 })
 
+// model used to dCrypt the hash and salt and therefor authenticate the user
+// is used in userController
 User.authenticate = async (email, password) => {
   const user = await User.findOne({ where: { email } })
   if (!user) {
@@ -45,6 +49,8 @@ User.authenticate = async (email, password) => {
   }
 }
 
+// model used to validate a token used in headers to authorize user rights ex. for use of a recipeController function.
+// is used in middleWare auth
 User.validateToken = (token) => {
   try {
     return jwt.verify(token, process.env.JWT_SECRET)
