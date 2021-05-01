@@ -4,7 +4,12 @@
 Skolprojekt -
 Övning i att bygga en SQL databas med Express & Sequalize.
 
-
+setup db:
+node db/setup.js
+seed db: 
+node db/seed.js
+start db:
+npm start
 
 Endpoints
 
