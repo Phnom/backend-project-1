@@ -15,7 +15,7 @@ module.exports = {
       //Parse and check Query
       const { page, pageSize, pageString } = parseQuery(req.query)
       if (!page || !pageSize || !pageString) {
-        throw new InvalidParam(["page"], ["pageSize"], ["title or name"])
+        throw new InvalidParam(["page", "pageSize", "title or name"])
       }
       //to model data is an Object if not throw error
       const data = await Ingredient.findAll({
@@ -41,7 +41,7 @@ module.exports = {
       //Check Body
       const { title, desc } = req.body
       if (!title || !desc) {
-        throw new InvalidBody(["title"], ["description"])
+        throw new InvalidBody(["title", "description"])
       }
       const UserId = req.user.id
       // to model
@@ -61,7 +61,7 @@ module.exports = {
       //Check body, measure & content is optional
       const { IngredientId, amount, measure, title, content } = req.body
       if (!IngredientId || !amount || !title) {
-        throw new InvalidBody(["RecipeId"], ["amount"], ["title"])
+        throw new InvalidBody(["RecipeId", "amount", "title"])
       }
 
       const UserId = req.user.id
@@ -107,7 +107,7 @@ module.exports = {
       //Parse and check Query
       const { page, pageSize, pageString } = parseQuery(req.query)
       if (!page || !pageSize || !pageString) {
-        throw new InvalidParam(["page"], ["pageSize"], ["title or name"])
+        throw new InvalidParam(["page", "pageSize", "title or name"])
       }
 
       const UserId = req.user.id
